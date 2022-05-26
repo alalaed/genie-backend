@@ -30,19 +30,21 @@ cloudinaryRouter.post(
     }
   }
 );
-cloudinaryRouter.delete(
-  "/uploadImage",
+cloudinaryRouter.post(
+  "/removeImage",
   JWTAuthMiddleware,
   adminOnlyMiddleware,
   (req, res, next) => {
     try {
-      let image_id = req.body.public_id;
+      let image_id = req.body.id;
       cloudinary.uploader.destroy(image_id, (err, result) => {
         if (err) return res.json({ success: false, err });
         res.send("done!");
+        console.log("done");
       });
     } catch (error) {
       next(error);
+      console.log(error);
     }
   }
 );

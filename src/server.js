@@ -28,7 +28,6 @@ passport.use("google", googleStrategy);
 server.use(cors());
 server.use(express.json());
 server.use(passport.initialize());
-server.use(bodyParser({ limit: "50mb" }));
 
 // ****************************************** ENDPOINTS ***************************************
 
