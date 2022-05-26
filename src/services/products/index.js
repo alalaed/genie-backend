@@ -23,11 +23,15 @@ productRouter.post(
   }
 );
 
-productRouter.get("/", async (req, res, next) => {
+productRouter.get("/:count", async (req, res, next) => {
   try {
-    let products = await ProductModel.find({});
+    let products = await ProductModel.find({})
+      .limit(parseInt(req.params.count))
+      .populate("category")
+      .populate("subcategory")
+      .sort([["createdAt", "desc"]]);
 
-    res.send(products);
+    res.json(products);
   } catch (error) {
     console.log(error);
   }
