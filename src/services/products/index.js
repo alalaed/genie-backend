@@ -36,27 +36,36 @@ productRouter.get("/:count", async (req, res, next) => {
     console.log(error);
   }
 });
-productRouter.put(
-  "/",
+
+productRouter.get(
+  "/:slug",
   JWTAuthMiddleware,
   adminOnlyMiddleware,
   async (req, res, next) => {
     try {
-      res.send(category);
+      let product = await ProductModel.findOneAndUpdate({
+        slug: req.params.slug,
+      })
+        .populate("category")
+        .populate("subcategory");
+      res.json(product);
     } catch (error) {
       console.log(error);
     }
   }
 );
+
 productRouter.delete(
-  "/",
+  "/:id",
   JWTAuthMiddleware,
   adminOnlyMiddleware,
   async (req, res, next) => {
     try {
-      res.send(category);
+      const deleted = await ProductModel.findByIdAndDelete(req.params.id);
+      res.json(deleted);
     } catch (error) {
       console.log(error);
+      return res.send("Delete failed!");
     }
   }
 );
