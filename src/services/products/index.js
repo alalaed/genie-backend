@@ -6,6 +6,19 @@ import { JWTAuthMiddleware } from "../auth/JWTAuthMiddleware.js";
 import slugify from "slugify";
 
 const productRouter = express.Router();
+productRouter.get("/count/:count", async (req, res, next) => {
+  try {
+    let products = await ProductModel.find({})
+      .limit(parseInt(req.params.count))
+      .populate("category")
+      .populate("subcategory")
+      .sort([["createdAt", "desc"]]);
+
+    res.json(products);
+  } catch (error) {
+    console.log(error);
+  }
+});
 
 productRouter.post(
   "/",
@@ -23,27 +36,13 @@ productRouter.post(
   }
 );
 
-productRouter.get("/:count", async (req, res, next) => {
-  try {
-    let products = await ProductModel.find({})
-      .limit(parseInt(req.params.count))
-      .populate("category")
-      .populate("subcategory")
-      .sort([["createdAt", "desc"]]);
-
-    res.json(products);
-  } catch (error) {
-    console.log(error);
-  }
-});
-
 productRouter.get(
   "/:slug",
-  JWTAuthMiddleware,
-  adminOnlyMiddleware,
+  // JWTAuthMiddleware,
+  // adminOnlyMiddleware,
   async (req, res, next) => {
     try {
-      let product = await ProductModel.findOneAndUpdate({
+      let product = await ProductModel.findOne({
         slug: req.params.slug,
       })
         .populate("category")
