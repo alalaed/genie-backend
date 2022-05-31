@@ -54,6 +54,27 @@ productRouter.get(
   }
 );
 
+productRouter.put(
+  "/:slug",
+  JWTAuthMiddleware,
+  adminOnlyMiddleware,
+  async (req, res, next) => {
+    try {
+      if (req.body.title) {
+        req.body.slug = slugify(req.body.title);
+      }
+      const updated = await ProductModel.findOneAndUpdate(
+        { slug: req.params.slug },
+        req.body,
+        { new: true }
+      );
+      res.json(updated);
+    } catch (error) {
+      console.log(error);
+    }
+  }
+);
+
 productRouter.delete(
   "/:id",
   JWTAuthMiddleware,
