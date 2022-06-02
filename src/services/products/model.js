@@ -31,10 +31,10 @@ const productSchema = new Schema(
     },
 
     quantity: Number,
-    // sold: {
-    //   type: Number,
-    //   default: 0,
-    // },
+    sold: {
+      type: Number,
+      default: 0,
+    },
     images: {
       type: Array,
     },
@@ -48,7 +48,7 @@ const productSchema = new Schema(
     },
     brand: {
       type: String,
-      enum: ["Apple", "Samsung", "Microsoft", "Lenovo", "ASUS"],
+      enum: ["Apple", "Samsung", "Microsoft", "Lenovo", "ASUS", "HP"],
     },
   },
   {

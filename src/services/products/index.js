@@ -54,6 +54,20 @@ productRouter.get(
   }
 );
 
+productRouter.post("/product-order", async (req, res, next) => {
+  try {
+    const { sort, order, limit } = req.body;
+    const products = await ProductModel.find({})
+      .populate("category")
+      .populate("subcategory")
+      .sort([[sort, order]])
+      .limit(limit);
+    res.json(products);
+  } catch (error) {
+    console.log(error);
+  }
+});
+
 productRouter.put(
   "/:slug",
   JWTAuthMiddleware,
