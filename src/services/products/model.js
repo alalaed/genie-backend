@@ -48,8 +48,14 @@ const productSchema = new Schema(
     },
     brand: {
       type: String,
-      enum: ["Apple", "Samsung", "Microsoft", "Lenovo", "ASUS", "HP"],
+      enum: ["Apple", "Samsung", "Microsoft", "Lenovo", "Asus", "HP"],
     },
+    rating: [
+      {
+        star: Number,
+        postedby: { type: Schema.Types.ObjectId, ref: "User" },
+      },
+    ],
   },
   {
     timestamps: true,
