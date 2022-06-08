@@ -62,22 +62,23 @@ productRouter.get(
 );
 
 productRouter.put(
-  "/product/rating/:productId",
+  "/:userId/rating/:productId",
   JWTAuthMiddleware,
   async (req, res, next) => {
     const product = await ProductModel.findById(req.params.productId);
-    const user = await UserModel.findOne({ email: req.user.email });
-    const { star } = req.body;
+    const user = await UserModel.findById(req.params.userId);
+    const { rate } = req.body;
+    console.log("hello there sir " + req);
 
     let alreadyRated = product.ratings.find(
-      (element) => element.postedBy.toString() === user._id.toString()
+      (ratings) => ratings.postedBy.toString() === user._id.toString()
     );
 
     if (alreadyRated === undefined) {
       let ratingAdded = await ProductModel.findByIdAndUpdate(
         product._id,
         {
-          $push: { ratings: { star: star, postedBy: user._id } },
+          $push: { ratings: { star: rate, postedBy: user._id } },
         },
         { new: true }
       );
@@ -87,7 +88,7 @@ productRouter.put(
         {
           ratings: { $elemMatch: alreadyRated },
         },
-        { $set: { "ratings.$.star": star } },
+        { $set: { "ratings.$.star": rate } },
         { new: true }
       );
       res.json(ratingUpdated);
@@ -109,24 +110,18 @@ productRouter.post("/product-order", async (req, res, next) => {
   }
 });
 
-// productRouter.post("/product-order", async (req, res, next) => {
-//   try {
-//     const { sort, order, page } = req.body;
-//     const currentPage = page || 1;
-//     const perPage = 6;
+productRouter.get("/related/:productId", async (req, res, next) => {
+  const product = await ProductModel.findById(req.params.productId);
+  const related = await ProductModel.find({
+    _id: { $ne: product._id },
+    category: product.category,
+  })
+    .limit(6)
+    .populate("category")
+    .populate("subcategory");
 
-//     const products = await ProductModel.find({})
-//       .skip((currentPage - 1) * perPage)
-//       .populate("category")
-//       .populate("subcategory")
-//       .sort([[sort, order]])
-//       .limit(perPage);
-//     res.json(products);
-//   } catch (error) {
-//     console.log(error);
-//   }
-// });
-
+  res.json(related);
+});
 productRouter.put(
   "/:slug",
   JWTAuthMiddleware,

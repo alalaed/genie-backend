@@ -50,10 +50,10 @@ const productSchema = new Schema(
       type: String,
       enum: ["Apple", "Samsung", "Microsoft", "Lenovo", "Asus", "HP"],
     },
-    rating: [
+    ratings: [
       {
         star: Number,
-        postedby: { type: Schema.Types.ObjectId, ref: "User" },
+        postedBy: { type: Schema.Types.ObjectId, ref: "User" },
       },
     ],
   },
