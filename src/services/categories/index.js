@@ -1,9 +1,9 @@
 import express from "express";
-import createError from "http-errors";
 import CategoryModel from "./model.js";
 import { adminOnlyMiddleware } from "../auth/adminOnlyMiddleware.js";
 import { JWTAuthMiddleware } from "../auth/JWTAuthMiddleware.js";
 import slugify from "slugify";
+import ProductModel from "../products/model.js";
 
 const categoryRouter = express.Router();
 
@@ -34,14 +34,22 @@ categoryRouter.get("/", async (req, res, next) => {
 
 categoryRouter.get(
   "/:slug",
-  JWTAuthMiddleware,
-  adminOnlyMiddleware,
+  // JWTAuthMiddleware,
+  // adminOnlyMiddleware,
   async (req, res, next) => {
     try {
       const category = await CategoryModel.find({
         slug: req.params.slug,
       });
-      res.send(category);
+      // res.send(category);
+      const products = await ProductModel.find({ category: category })
+        .populate("category")
+        .populate("postedBy", "_id name");
+
+      res.json({
+        category,
+        products,
+      });
     } catch (error) {
       res.send("oops, something went wrong!");
       console.log(error);

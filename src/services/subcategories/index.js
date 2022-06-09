@@ -4,8 +4,33 @@ import SubCategoryModel from "./model.js";
 import { adminOnlyMiddleware } from "../auth/adminOnlyMiddleware.js";
 import { JWTAuthMiddleware } from "../auth/JWTAuthMiddleware.js";
 import slugify from "slugify";
+import ProductModel from "../products/model.js";
 
 const subRouter = express.Router();
+
+subRouter.get("/subs", async (req, res, next) => {
+  res.json(await SubCategoryModel.find({}).sort({ createdAt: -1 }).exec());
+});
+
+subRouter.get(
+  "/sub/:slug",
+  // JWTAuthMiddleware,
+  // adminOnlyMiddleware,
+  async (req, res, next) => {
+    try {
+      const subCategory = await SubCategoryModel.find({
+        slug: req.params.slug,
+      });
+      const products = await ProductModel.find({ subcategory: subCategory })
+        .populate("category")
+        .populate("postedBy", "_id name");
+
+      res.send({ subCategory, products });
+    } catch (error) {
+      console.log(error);
+    }
+  }
+);
 
 subRouter.post(
   "/",
@@ -44,6 +69,10 @@ subRouter.get(
       const subCategory = await SubCategoryModel.find({
         slug: req.params.slug,
       });
+      // const products = await ProductModel.find({ subcategory: subcategory })
+      //   .populate("category")
+      //   .populate("postedBy", "_id name");
+
       res.send(subCategory);
     } catch (error) {
       console.log(error);
