@@ -5,6 +5,16 @@ import { adminOnlyMiddleware } from "../auth/adminOnlyMiddleware.js";
 import { JWTAuthMiddleware } from "../auth/JWTAuthMiddleware.js";
 import slugify from "slugify";
 import UserModel from "../users/model.js";
+import {
+  handleQuery,
+  handlePrice,
+  handleCategory,
+  handleRating,
+  handleSubCategory,
+  handleShipping,
+  handleColor,
+  handleBrand,
+} from "./searchAndFilter.js";
 
 const productRouter = express.Router();
 
@@ -157,5 +167,49 @@ productRouter.delete(
     }
   }
 );
+
+productRouter.post("/search/filters", async (req, res, next) => {
+  try {
+    const {
+      query,
+      price,
+      category,
+      stars,
+      subCategory,
+      shipping,
+      color,
+      brand,
+    } = req.body;
+
+    if (query) {
+      await handleQuery(req, res, next, query);
+    }
+    if (price !== undefined) {
+      await handlePrice(req, res, next, price);
+    }
+    if (category !== undefined) {
+      await handleCategory(req, res, next, category);
+    }
+    if (stars !== undefined) {
+      await handleRating(req, res, next, stars);
+    }
+    if (subCategory !== undefined) {
+      await handleSubCategory(req, res, next, subCategory);
+    }
+    if (shipping !== undefined) {
+      await handleShipping(req, res, next, shipping);
+    }
+    if (color !== undefined) {
+      await handleColor(req, res, next, color);
+    }
+    if (brand !== undefined) {
+      await handleBrand(req, res, next, brand);
+    }
+  } catch (error) {
+    next(error);
+    res.status(400).json(error.message);
+    console.log(error.message);
+  }
+});
 
 export default productRouter;
