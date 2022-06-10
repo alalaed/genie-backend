@@ -175,7 +175,7 @@ productRouter.post("/search/filters", async (req, res, next) => {
       price,
       category,
       stars,
-      subCategory,
+      subcategory,
       shipping,
       color,
       brand,
@@ -193,8 +193,8 @@ productRouter.post("/search/filters", async (req, res, next) => {
     if (stars !== undefined) {
       await handleRating(req, res, next, stars);
     }
-    if (subCategory !== undefined) {
-      await handleSubCategory(req, res, next, subCategory);
+    if (subcategory !== undefined) {
+      await handleSubCategory(req, res, next, subcategory);
     }
     if (shipping !== undefined) {
       await handleShipping(req, res, next, shipping);

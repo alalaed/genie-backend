@@ -4,7 +4,7 @@ export const handleQuery = async (req, res, next, query) => {
   const products = await productsModel
     .find({ $text: { $search: query } })
     .populate("category", "_id name")
-    .populate("subCategories", "_id name")
+    .populate("subcategory", "_id name")
     .populate("postedBy", "_id name");
   if (products) res.send(products);
 };
@@ -13,7 +13,7 @@ export const handlePrice = async (req, res, next, price) => {
   const products = await productsModel
     .find({ price: { $gte: price[0], $lte: price[1] } })
     .populate("category", "_id name")
-    .populate("subCategories", "_id name")
+    .populate("subcategory", "_id name")
     .populate("postedBy", "_id name");
   if (products) res.send(products);
 };
@@ -22,7 +22,7 @@ export const handleCategory = async (req, res, next, category) => {
   const products = await productsModel
     .find({ category })
     .populate("category", "_id name")
-    .populate("subCategories", "_id name")
+    .populate("subcategory", "_id name")
     .populate("postedBy", "_id name");
   if (products) res.send(products);
 };
@@ -44,7 +44,7 @@ export const handleRating = async (req, res, next, stars) => {
   const products = await productsModel
     .find({ _id: rating })
     .populate("category", "_id name")
-    .populate("subCategories", "_id name")
+    .populate("subcategory", "_id name")
     .populate("postedBy", "_id name");
   if (products) res.send(products);
   console.log(
@@ -53,11 +53,12 @@ export const handleRating = async (req, res, next, stars) => {
   );
 };
 
-export const handleSubCategory = async (req, res, next, subCategory) => {
+export const handleSubCategory = async (req, res, next, subcategory) => {
+  console.log("hello there sir ", subcategory);
   const products = await productsModel
-    .find({ subCategories: subCategory })
+    .find({ subcategory: subcategory })
     .populate("category", "_id name")
-    .populate("subCategories", "_id name")
+    .populate("subcategory", "_id name")
     .populate("postedBy", "_id name");
   if (products) res.send(products);
 };
@@ -65,7 +66,7 @@ export const handleShipping = async (req, res, next, shipping) => {
   const products = await productsModel
     .find({ shipping })
     .populate("category", "_id name")
-    .populate("subCategories", "_id name")
+    .populate("subcategory", "_id name")
     .populate("postedBy", "_id name");
   if (products) res.send(products);
 };
@@ -73,7 +74,7 @@ export const handleColor = async (req, res, next, color) => {
   const products = await productsModel
     .find({ color })
     .populate("category", "_id name")
-    .populate("subCategories", "_id name")
+    .populate("subcategory", "_id name")
     .populate("postedBy", "_id name");
   if (products) res.send(products);
 };
@@ -81,7 +82,7 @@ export const handleBrand = async (req, res, next, brand) => {
   const products = await productsModel
     .find({ brand })
     .populate("category", "_id name")
-    .populate("subCategories", "_id name")
+    .populate("subcategory", "_id name")
     .populate("postedBy", "_id name");
   if (products) res.send(products);
 };
