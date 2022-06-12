@@ -9,6 +9,81 @@ import { adminOnlyMiddleware } from "../auth/adminOnlyMiddleware.js";
 
 const usersRouter = express.Router();
 
+usersRouter.post("/cart", JWTAuthMiddleware, async (req, res, next) => {
+  try {
+    const { cart } = req.body;
+    const { _id } = req.user;
+
+    const previousUserCart = await cartModel.findOne({ orderdBy: _id });
+
+    if (previousUserCart) {
+      previousUserCart.remove();
+    }
+
+    const products = [];
+
+    for (let i = 0; i < cart.length; i++) {
+      let object = {};
+      object.product = cart[i]._id;
+      object.count = cart[i].count;
+      object.color = cart[i].color;
+      let productFromDb = await productsModel
+        .findById(cart[i]._id)
+        .select("price");
+      object.price = productFromDb.price;
+
+      products.push(object);
+      // console.log("🚀 ~ file: index.js ~ line 31 ~ products", products)
+    }
+
+    let cartTotal = 0;
+
+    for (let i = 0; i < products.length; i++) {
+      cartTotal = cartTotal + products[i].price * products[i].count;
+    }
+    // console.log("🚀 ~file: index.js ~line 47 ~cartTotal", cartTotal)
+
+    const newCart = await new cartModel({
+      products,
+      cartTotal,
+      orderdBy: _id,
+      // totalAfterDiscount,
+    });
+    await newCart.save();
+    // console.log("🚀 ~ file: index.js ~ line 59 ~ newCart", newCart)
+    if (newCart) res.status(201).send(newCart);
+  } catch (error) {
+    next(error);
+  }
+});
+
+usersRouter.get("/cart", JWTAuthMiddleware, async (req, res, next) => {
+  try {
+    const { _id } = req.user;
+
+    const cart = await cartModel
+      .findOne({ orderdBy: _id })
+      .populate("products.product");
+    console.log("🚀 ~ file: index.js ~ line 81 ~ cart", cart);
+
+    res.status(201).send(cart);
+  } catch (error) {
+    next(error);
+  }
+});
+
+usersRouter.delete("/cart", JWTAuthMiddleware, async (req, res, next) => {
+  try {
+    const { _id } = req.user;
+
+    const cart = await cartModel.findOneAndRemove({ orderdBy: _id });
+
+    res.status(201).send(cart);
+  } catch (error) {
+    next(error);
+  }
+});
+
 usersRouter.get(
   "/",
   JWTAuthMiddleware,
