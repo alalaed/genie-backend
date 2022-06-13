@@ -2,6 +2,8 @@ import express from "express";
 import passport from "passport";
 import createError from "http-errors";
 import usersModel from "./model.js";
+import cartModel from "../cart/model.js";
+import productsModel from "../products/model.js";
 
 import { generateAccessToken } from "../auth/tools.js";
 import { JWTAuthMiddleware } from "../auth/JWTAuthMiddleware.js";
@@ -57,20 +59,25 @@ usersRouter.post("/cart", JWTAuthMiddleware, async (req, res, next) => {
   }
 });
 
-usersRouter.get("/cart", JWTAuthMiddleware, async (req, res, next) => {
-  try {
-    const { _id } = req.user;
+usersRouter.get(
+  "/cart",
+  JWTAuthMiddleware,
+  // adminOnlyMiddleware,
+  async (req, res, next) => {
+    try {
+      const { _id } = req.user;
 
-    const cart = await cartModel
-      .findOne({ orderdBy: _id })
-      .populate("products.product");
-    console.log("🚀 ~ file: index.js ~ line 81 ~ cart", cart);
+      const cart = await cartModel
+        .findOne({ orderdBy: _id })
+        .populate("products.product");
+      console.log("🚀 ~ file: index.js ~ line 81 ~ cart", cart);
 
-    res.status(201).send(cart);
-  } catch (error) {
-    next(error);
+      res.status(201).send(cart);
+    } catch (error) {
+      next(error);
+    }
   }
-});
+);
 
 usersRouter.delete("/cart", JWTAuthMiddleware, async (req, res, next) => {
   try {
@@ -83,6 +90,84 @@ usersRouter.delete("/cart", JWTAuthMiddleware, async (req, res, next) => {
     next(error);
   }
 });
+usersRouter.post(
+  "/cart/coupon",
+  JWTAuthMiddleware,
+  adminOnlyMiddleware,
+  async (req, res, next) => {
+    try {
+      const { coupon } = req.body;
+      console.log("🚀 ~ file: index.js ~ line 111 ~ coupon", coupon);
+
+      const couponFromDb = await couponsModel.findOne({ name: coupon });
+      console.log(
+        "🚀 ~ file: index.js ~ line 114 ~ couponFromDb",
+        couponFromDb
+      );
+
+      const { _id } = await usersModel.findById(req.user._id);
+      console.log("🚀 ~ file: index.js ~ line 117 ~ _id", _id);
+
+      const fullPriceCart = await cartModel.findOne({ orderdBy: _id });
+      console.log(
+        "🚀 ~ file: index.js ~ line 122 ~ fullPriceCart",
+        fullPriceCart
+      );
+
+      const cartTotal = fullPriceCart.cartTotal;
+      console.log("🚀 ~ file: index.js ~ line 126 ~ cartTotal", cartTotal);
+
+      const totalAfterDiscount = (
+        cartTotal -
+        (cartTotal * couponFromDb.discount) / 100
+      ).toFixed(2);
+      console.log(
+        "🚀 ~ file: index.js ~ line 132 ~ totalAfterDiscount",
+        totalAfterDiscount
+      );
+
+      const cart = await cartModel.findOneAndUpdate(
+        { orderdBy: _id },
+        { totalAfterDiscount },
+        { new: true }
+      );
+      console.log("🚀 ~ file: index.js ~ line 139 ~ cart", cart);
+
+      if (cart) {
+        res.send(cart);
+      } else {
+        next(401, `Something went wrong !`);
+      }
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
+// TODO adopt the same req.user._id without the user in params
+usersRouter.post(
+  "/address",
+  JWTAuthMiddleware,
+  adminOnlyMiddleware,
+  async (req, res, next) => {
+    try {
+      const userAddress = await usersModel.findByIdAndUpdate(
+        req.user._id,
+        req.body,
+        {
+          new: true,
+        }
+      );
+      if (userAddress) {
+        res.send(userAddress);
+      } else {
+        next(401, `User with id ${req.user._id} not found!`);
+      }
+    } catch (error) {
+      next(error);
+    }
+  }
+);
 
 usersRouter.get(
   "/",
