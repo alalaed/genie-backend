@@ -4,6 +4,7 @@ import createError from "http-errors";
 import usersModel from "./model.js";
 import cartModel from "../cart/model.js";
 import productsModel from "../products/model.js";
+import PromoCodeModel from "../promocode/model.js";
 
 import { generateAccessToken } from "../auth/tools.js";
 import { JWTAuthMiddleware } from "../auth/JWTAuthMiddleware.js";
@@ -91,15 +92,15 @@ usersRouter.delete("/cart", JWTAuthMiddleware, async (req, res, next) => {
   }
 });
 usersRouter.post(
-  "/cart/coupon",
+  "/cart/code",
   JWTAuthMiddleware,
   adminOnlyMiddleware,
   async (req, res, next) => {
     try {
-      const { coupon } = req.body;
-      console.log("🚀 ~ file: index.js ~ line 111 ~ coupon", coupon);
+      const { PromoCode } = req.body;
+      console.log("🚀 ~ file: index.js ~ line 111 ~ coupon", PromoCode);
 
-      const couponFromDb = await couponsModel.findOne({ name: coupon });
+      const couponFromDb = await PromoCodeModel.findOne({ name: PromoCode });
       console.log(
         "🚀 ~ file: index.js ~ line 114 ~ couponFromDb",
         couponFromDb

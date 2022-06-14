@@ -13,10 +13,7 @@ PromoCodeRouter.post(
   async (req, res, next) => {
     try {
       const { name, expiry, discount } = req.body.PromoCode;
-      console.log(
-        "🚀 ~ file: index.js ~ line 16 ~ req.body.coupon",
-        req.body.Promocode
-      );
+      console.log("🚀 ~ file: index.js ~ line 16 ~ req.body.coupon", req.user);
       const code = new PromoCodeModel({
         name,
         expiry,
@@ -47,7 +44,7 @@ PromoCodeRouter.delete(
   adminOnlyMiddleware,
   async (req, res, next) => {
     try {
-      const code = await couponsModel.findByIdAndDelete(req.params.codeId);
+      const code = await PromoCodeModel.findByIdAndDelete(req.params.codeId);
       if (code) res.status(204).send();
       else next(createError(404, `code not found!`));
     } catch (error) {
