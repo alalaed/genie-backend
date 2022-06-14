@@ -17,6 +17,8 @@ import productRouter from "./services/products/index.js";
 import categoryRouter from "./services/categories/index.js";
 import subRouter from "./services/subcategories/index.js";
 import cloudinaryRouter from "./services/cloudinary/index.js";
+import PromoCodeRouter from "./services/promocode/index.js";
+import stripeRouter from "./services/stripe/index.js";
 
 const server = express();
 const port = process.env.PORT || 3001;
@@ -36,6 +38,8 @@ server.use("/products", [productRouter]);
 server.use("/category", [categoryRouter]);
 server.use("/subcategory", [subRouter]);
 server.use("/cloudinary", [cloudinaryRouter]);
+server.use("/code", [PromoCodeRouter]);
+server.use("/stripe", [stripeRouter]);
 
 // ***************************************** ERROR HANDLERS ***********************************
 

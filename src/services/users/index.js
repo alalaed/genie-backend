@@ -148,7 +148,7 @@ usersRouter.post(
 usersRouter.post(
   "/address",
   JWTAuthMiddleware,
-  adminOnlyMiddleware,
+  // adminOnlyMiddleware,
   async (req, res, next) => {
     try {
       const userAddress = await usersModel.findByIdAndUpdate(
