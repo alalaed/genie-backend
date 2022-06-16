@@ -2,8 +2,10 @@ import express from "express";
 import { JWTAuthMiddleware } from "../auth/JWTAuthMiddleware.js";
 import UsersModel from "../users/model.js";
 import CartModel from "../cart/model.js";
-import createError from "http-errors";
+import ProductModel from "../products/model.js";
+import PromoCodeModel from "../promocode/model.js";
 import Stripe from "stripe";
+import createError from "http-errors";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET);
 
@@ -15,31 +17,21 @@ stripeRouter.post(
   async (req, res, next) => {
     try {
       console.log(req.body);
-      const { couponApplied } = req.body;
+      const { codeApplied } = req.body;
       console.log(
-        "🚀 ~ file: index.js ~ line 11 ~ createPaymentIntent ~ req.body",
-        req.body
+        "🚀 ~ file: index.js ~ line 22222 ~ createPaymentIntent ~ req.body",
+        codeApplied
       );
 
       const { _id } = req.user;
 
-      // 2 get cart totals
-
       const { cartTotal, totalAfterDiscount } = await CartModel.findOne({
-        orderedBy: _id,
+        orderdBy: _id,
       });
-      console.log(
-        "🚀 ~ file: index.js ~ line 20 ~ createPaymentIntent ~ totalAfterDiscount",
-        totalAfterDiscount
-      );
-      console.log(
-        "🚀 ~ file: index.js ~ line 20 ~ createPaymentIntent ~ cartTotal",
-        cartTotal
-      );
 
       let finalAmount = 0;
 
-      if (totalAfterDiscount) {
+      if (codeApplied && totalAfterDiscount) {
         finalAmount = totalAfterDiscount * 100;
       } else {
         finalAmount = cartTotal * 100;

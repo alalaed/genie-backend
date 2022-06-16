@@ -5,6 +5,7 @@ import usersModel from "./model.js";
 import cartModel from "../cart/model.js";
 import productsModel from "../products/model.js";
 import PromoCodeModel from "../promocode/model.js";
+import orderModel from "../orders/model.js";
 
 import { generateAccessToken } from "../auth/tools.js";
 import { JWTAuthMiddleware } from "../auth/JWTAuthMiddleware.js";
@@ -94,7 +95,7 @@ usersRouter.delete("/cart", JWTAuthMiddleware, async (req, res, next) => {
 usersRouter.post(
   "/cart/code",
   JWTAuthMiddleware,
-  adminOnlyMiddleware,
+  // adminOnlyMiddleware,
   async (req, res, next) => {
     try {
       const { PromoCode } = req.body;
@@ -178,6 +179,208 @@ usersRouter.get(
     try {
       const users = await usersModel.find();
       res.send(users);
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
+usersRouter.post("/order", JWTAuthMiddleware, async (req, res, next) => {
+  try {
+    const { paymentIntent } = req.body.stripeResponse;
+
+    const { _id } = req.user;
+
+    const { products } = await cartModel.findOne({ orderdBy: _id });
+
+    const newOrder = await new orderModel({
+      products,
+      paymentIntent,
+      orderdBy: _id,
+    }).save();
+
+    const bulkUpdate = products.map((item) => {
+      return {
+        updateOne: {
+          filter: { _id: item.product._id },
+          update: { $inc: { quantity: -item.count, sold: +item.count } },
+        },
+      };
+    });
+
+    await productsModel.bulkWrite(bulkUpdate, {});
+
+    console.log("🚀 ~ file: index.js ~ line 173 ~ newOrder", newOrder);
+
+    if (newOrder) {
+      res.send({ ok: true });
+    } else {
+      next(401, `Failed to create the order`);
+    }
+  } catch (error) {
+    next(error);
+  }
+});
+
+usersRouter.get("/orders", JWTAuthMiddleware, async (req, res, next) => {
+  try {
+    const { _id } = req.user;
+    console.log(_id);
+
+    const orders = await orderModel
+      .find({ orderdBy: _id })
+      .populate("products.product");
+
+    if (orders) res.send(orders);
+  } catch (error) {
+    next(error);
+  }
+});
+
+usersRouter.delete("/order", JWTAuthMiddleware, async (req, res, next) => {
+  try {
+    const { _id } = req.user;
+
+    const cart = await cartModel.findOneAndRemove({ orderdBy: _id });
+    console.log(
+      "🚀 ~ file: index.js ~ line 192 ~ usersRouter.delete ~ cart",
+      cart
+    );
+
+    if (cart) {
+      res.send(cart);
+    } else {
+      next(401, `Cart not found!`);
+    }
+  } catch (error) {
+    next(error);
+  }
+});
+
+usersRouter.post("/cash-order", JWTAuthMiddleware, async (req, res, next) => {
+  try {
+    const { _id } = req.user;
+
+    const { CashOnDelivery, couponApplied } = req.body;
+
+    const cart = await cartModel.findOne({ orderdBy: _id });
+    console.log(
+      "🚀 ~ file: index.js ~ line 212 ~ usersRouter.post ~ cart",
+      cart
+    );
+
+    let finalAmount = 0;
+
+    if (couponApplied && cart.totalAfterDiscount) {
+      finalAmount = (cart.totalAfterDiscount * 100).toFixed(0);
+    } else {
+      finalAmount = (cart.cartTotal * 100).toFixed(0);
+    }
+
+    const newOrder = await new orderModel({
+      products: cart.products,
+      paymentIntent: {
+        id: uniqid(),
+        amount: finalAmount,
+        currency: "EUR",
+        status: "Cash on delivery",
+        created: Date.now(),
+        payment_method_types: ["cash"],
+      },
+      orderdBy: _id,
+      orderStatus: "Cash on delivery",
+    }).save();
+    console.log(
+      "🚀 ~ file: index.js ~ line 226 ~ usersRouter.post ~ newOrder",
+      newOrder
+    );
+
+    const bulkUpdate = cart.products.map((item) => {
+      return {
+        updateOne: {
+          filter: { _id: item.product._id },
+          update: { $inc: { quantity: -item.count, sold: +item.count } },
+        },
+      };
+    });
+
+    await productsModel.bulkWrite(bulkUpdate, {});
+
+    if (newOrder) {
+      res.send({ ok: true });
+    } else {
+      next(401, `Failed to create the order`);
+    }
+  } catch (error) {
+    next(error);
+  }
+});
+
+usersRouter.post("/wishlist", JWTAuthMiddleware, async (req, res, next) => {
+  try {
+    const { productId } = req.body;
+
+    const { _id } = req.user;
+    console.log(
+      "🚀 ~ file: index.js ~ line 269 ~ usersRouter.post ~ req.user",
+      req.user
+    );
+
+    const user = await usersModel.findOneAndUpdate(_id, {
+      $addToSet: { wishlist: productId },
+    });
+    console.log(
+      "🚀 ~ file: index.js ~ line 275 ~ usersRouter.post ~ user",
+      user
+    );
+
+    if (user) {
+      res.send(user);
+    } else {
+      next(401, `User with id ${req.user._id} not found!`);
+    }
+  } catch (error) {
+    next(error);
+  }
+});
+
+usersRouter.get("/wishlist", JWTAuthMiddleware, async (req, res, next) => {
+  try {
+    const { _id } = req.user;
+
+    const wishlist = await usersModel
+      .findById(_id)
+      .select("wishlist")
+      .populate({ path: "wishlist", populate: { path: "product" } });
+    console.log(
+      "🚀 ~ file: index.js ~ line 298 ~ usersRouter.get ~ wishlist",
+      wishlist
+    );
+
+    if (wishlist) res.send(wishlist);
+  } catch (error) {
+    next(error);
+  }
+});
+
+usersRouter.put(
+  "/wishlist/:productId",
+  JWTAuthMiddleware,
+  async (req, res, next) => {
+    try {
+      const { productId } = req.params;
+
+      const { _id } = req.user;
+
+      const wishlist = await usersModel.findOneAndUpdate(_id, {
+        $pull: { wishlist: productId },
+      });
+
+      if (wishlist) {
+        res.send(wishlist);
+      } else {
+        next(401, `User with id ${req.user._id} not found!`);
+      }
     } catch (error) {
       next(error);
     }
