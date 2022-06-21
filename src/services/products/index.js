@@ -70,6 +70,22 @@ productRouter.get(
     }
   }
 );
+productRouter.get(
+  "/wishlist/:id",
+  // JWTAuthMiddleware,
+  // adminOnlyMiddleware,
+  async (req, res, next) => {
+    try {
+      let product = await ProductModel.findOne({
+        id: req.params.id,
+      });
+
+      res.json(product);
+    } catch (error) {
+      console.log(error);
+    }
+  }
+);
 
 productRouter.put(
   "/:userId/rating/:productId",

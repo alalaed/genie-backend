@@ -321,12 +321,9 @@ usersRouter.post("/wishlist", JWTAuthMiddleware, async (req, res, next) => {
     const { productId } = req.body;
 
     const { _id } = req.user;
-    console.log(
-      "🚀 ~ file: index.js ~ line 269 ~ usersRouter.post ~ req.user",
-      req.user
-    );
+    console.log("🚀 sdfsds", req.user);
 
-    const user = await usersModel.findOneAndUpdate(_id, {
+    const user = await usersModel.findByIdAndUpdate(_id, {
       $addToSet: { wishlist: productId },
     });
     console.log(
@@ -347,6 +344,7 @@ usersRouter.post("/wishlist", JWTAuthMiddleware, async (req, res, next) => {
 usersRouter.get("/wishlist", JWTAuthMiddleware, async (req, res, next) => {
   try {
     const { _id } = req.user;
+    console.log("the user is here", _id);
 
     const wishlist = await usersModel
       .findById(_id)

@@ -3,7 +3,6 @@ import mongoose from "mongoose";
 import listEndpoints from "express-list-endpoints";
 import cors from "cors";
 import passport from "passport";
-import bodyParser from "body-parser";
 import googleStrategy from "./services/auth/OAuth.js";
 import {
   badRequestHandler,
