@@ -23,13 +23,13 @@ import { adminsRouter } from "./services/admin/index.js";
 const server = express();
 const port = process.env.PORT || 3001;
 
-passport.use("google", googleStrategy);
+// passport.use("google", googleStrategy);
 
 // ***************************************** MIDDLEWARES **************************************
 
 server.use(cors());
 server.use(express.json());
-server.use(passport.initialize());
+// server.use(passport.initialize());
 
 // ****************************************** ENDPOINTS ***************************************
 
