@@ -7,9 +7,9 @@ import productsModel from "../products/model.js";
 import PromoCodeModel from "../promocode/model.js";
 import orderModel from "../orders/model.js";
 
-import { generateAccessToken } from "../auth/tools.js";
 import { JWTAuthMiddleware } from "../auth/JWTAuthMiddleware.js";
 import { adminOnlyMiddleware } from "../auth/adminOnlyMiddleware.js";
+import { generateAccessToken } from "../auth/tools.js";
 
 const usersRouter = express.Router();
 
