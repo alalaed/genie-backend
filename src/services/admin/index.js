@@ -3,7 +3,7 @@ import orderModel from "../orders/model.js";
 import { JWTAuthMiddleware } from "../auth/JWTAuthMiddleware.js";
 import { adminOnlyMiddleware } from "../auth/adminOnlyMiddleware.js";
 
-export const adminsRouter = express.Router();
+const adminsRouter = express.Router();
 
 adminsRouter.get(
   "/orders",
@@ -55,3 +55,5 @@ adminsRouter.put(
     }
   }
 );
+
+export default adminsRouter;
