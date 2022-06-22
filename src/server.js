@@ -28,7 +28,9 @@ const port = process.env.PORT || 3001;
 // ***************************************** MIDDLEWARES **************************************
 
 server.use(cors());
-server.use(express.json());
+server.use(express.json({ limit: "50mb" }));
+server.use(express.urlencoded({ limit: "50mb" }));
+// server.use(express.json());
 // server.use(passport.initialize());
 
 // ****************************************** ENDPOINTS ***************************************
